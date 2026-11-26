@@ -1,16 +1,17 @@
 import { fork, spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { readFileSync } from 'node:fs';
+import { measurementProfile } from './measure-profiles.mjs';
 
 const profile = process.argv[2] ?? 'smoke';
-if (process.argv.length > 3 || !['smoke', 'read', 'publish'].includes(profile)) throw new Error('Unknown profile');
-const measuring = profile !== 'smoke';
+const config = measurementProfile(profile);
+if (process.argv.length > 3 || (profile !== 'smoke' && !config)) throw new Error('Unknown profile');
 const shutdown = new AbortController();
 const onInt = () => shutdown.abort(new Error('Interrupted (SIGINT)'));
 const onTerm = () => shutdown.abort(new Error('Interrupted (SIGTERM)'));
 process.once('SIGINT', onInt);
 process.once('SIGTERM', onTerm);
-const deadline = AbortSignal.any([shutdown.signal, AbortSignal.timeout(measuring ? 35_000 : 25_000)]);
+const deadline = AbortSignal.any([shutdown.signal, AbortSignal.timeout(config ? (config.windowSeconds + 15) * 1000 : 25_000)]);
 const children = [];
 
 function startResources() {
@@ -47,7 +48,7 @@ function startResources() {
   };
 }
 
-const finishResources = measuring ? startResources() : null;
+const finishResources = config ? startResources() : null;
 
 function supervise(child) {
   let spawnError;
@@ -91,7 +92,7 @@ async function run() {
   deadline.throwIfAborted();
 
   // Do not pass proxy or arbitrary target configuration to k6.
-  const script = measuring ? '/app/measure.js' : '/app/smoke.js';
+  const script = config ? '/app/measure.js' : '/app/smoke.js';
   const load = supervise(spawn('/usr/local/bin/k6', ['run', '--no-color', script], {
     env: { HOME: '/tmp', PUBLISHER_PORT: String(port), PUBLISHER_PROFILE: profile },
     stdio: ['ignore', 'inherit', 'inherit'],
