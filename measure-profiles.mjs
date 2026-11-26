@@ -14,12 +14,13 @@ export const capacityBudget = Object.freeze({ p95: 20, p99: 50, visibility: 100 
 
 export function measurementProfile(name) {
   if (Object.prototype.hasOwnProperty.call(profiles, name)) return profiles[name];
-  const match = /^(scan|capacity|soak)-(read|publish)-(\d{2,4})$/.exec(name);
+  const match = /^(scan|capacity|soak|endurance|diagnostic)-(read|publish)-(\d{2,4})$/.exec(name);
   if (!match) return null;
   const [, phase, workload, target] = match;
   const rate = Number(target);
-  if (!capacities.has(rate) || target !== String(rate)) return null;
-  const windowSeconds = { scan: 12, capacity: 30, soak: 90 }[phase];
+  if (!capacities.has(rate) || target !== String(rate)
+      || (phase === 'endurance' && rate !== 800) || (phase === 'diagnostic' && rate !== 1200)) return null;
+  const windowSeconds = { scan: 12, capacity: 30, soak: 90, endurance: 300, diagnostic: 30 }[phase];
   return {
     rate, windowSeconds, preAllocatedVUs: 64, maxVUs: 96,
     writes: workload === 'publish' ? Math.floor((windowSeconds - 4) / 3.5) + 1 : 0,

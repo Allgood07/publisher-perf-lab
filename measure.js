@@ -1,7 +1,7 @@
 import { sleep } from 'k6';
 import exec from 'k6/execution';
 import http from 'k6/http';
-import { Counter, Rate, Trend } from 'k6/metrics';
+import { Counter, Gauge, Rate, Trend } from 'k6/metrics';
 import { capacityBudget, measurementProfile } from './measure-profiles.mjs';
 
 const port = Number(__ENV.PUBLISHER_PORT);
@@ -22,6 +22,7 @@ const writeSpacingMs = 3_500;
 const versions = Array.from({ length: writes + 1 }, (_, i) => ({ title: `Publisher measurement V${i + 1}`, body: `publisher-measure-marker-${i + 1}` }));
 const guestReadMillis = new Trend('guest_read_ms', true);
 const guestReadSamples = new Counter('guest_read_samples');
+const diagnosticVUs = profile.startsWith('diagnostic-') ? new Gauge('diagnostic_active_vus') : null;
 const guestReadErrors = new Rate('guest_read_errors');
 const guestVersionMismatches = new Rate('guest_version_mismatches');
 const publishVisibleMillis = new Trend('publish_visible_ms', true);
@@ -88,6 +89,7 @@ export function warmup() { readPublic({ ...request, responseType: 'none' }); }
 export function reader() {
   // With gracefulStop, k6 can dispatch extra iterations around the window boundary.
   if (config.capacity && exec.scenario.iterationInTest >= targetReads) return;
+  if (diagnosticVUs && exec.scenario.iterationInTest % 64 === 0) diagnosticVUs.add(exec.instance.vusActive);
   const response = readPublic();
   guestReadMillis.add(response.timings.duration);
   guestReadErrors.add(response.status !== 200);
