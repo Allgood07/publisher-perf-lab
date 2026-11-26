@@ -45,11 +45,15 @@ async function configuration(name) {
   return JSON.parse(await activeDocker(['inspect', '--format', '{{json .HostConfig}}', name]));
 }
 
-// Both containers are named before launch so even an interrupted docker run can be cleaned up.
-async function remove(name) {
-  try { await docker(['rm', '-f', name]); }
-  catch (error) {
-    if (!String(error.stderr).includes('No such container')) throw error;
+async function remove(name, uncertainLaunch) {
+  // A timed-out Docker CLI may leave a daemon request still creating the named container.
+  for (let attempt = 0; ; attempt++) {
+    try { await docker(['rm', '-f', name]); return; }
+    catch (error) {
+      if (!String(error.stderr).includes('No such container')) throw error;
+      if (!uncertainLaunch || attempt === 12) return;
+      await delay(250);
+    }
   }
 }
 
@@ -62,6 +66,20 @@ async function trial(image, profile) {
   let wallMs = null, publisherStart = null, publisherEnd = null;
   const file = `${profile}-${trialNumber}`;
   const logs = {};
+  const uncertainLaunches = new Set();
+  async function launch(name, args) {
+    abort.signal.throwIfAborted();
+    let id;
+    try {
+      // Let the bounded create/start RPC settle before responding to a user signal.
+      id = await docker(['run', '-d', '--name', name, ...args]);
+    } catch (error) {
+      if (error.killed || error.signal) uncertainLaunches.add(name);
+      throw error;
+    }
+    abort.signal.throwIfAborted();
+    return id;
+  }
   async function capture(role, name) {
     if (!logs[role]) {
       try { logs[role] = await shell('docker', ['logs', name]); }
@@ -70,7 +88,7 @@ async function trial(image, profile) {
     return logs[role];
   }
   try {
-    const serverId = await activeDocker(['run', '-d', '--name', server, '--network', 'none', ...limit('1', '384m'), ...mount,
+    const serverId = await launch(server, ['--network', 'none', ...limit('1', '384m'), ...mount,
       '--entrypoint', 'node', image, '/publisher/src/server.ts']);
     const serverConfig = await configuration(server);
     if (serverConfig.NetworkMode !== 'none' || serverConfig.NanoCpus !== 1_000_000_000
@@ -86,7 +104,7 @@ async function trial(image, profile) {
     if (Number(port) > 65_535) throw new Error('Invalid dynamic Publisher port');
     publisherStart = stat(await activeDocker(['exec', server, 'cat', '/sys/fs/cgroup/cpu.stat']));
     const start = performance.now();
-    await activeDocker(['run', '-d', '--name', load, '--network', `container:${serverId}`, ...limit('2', '384m'),
+    await launch(load, ['--network', `container:${serverId}`, ...limit('2', '384m'),
       '--env', `PUBLISHER_PORT=${port}`, '--env', `PUBLISHER_PROFILE=${profile}`, '--env', 'HOME=/tmp',
       '--entrypoint', '/bin/sh', image, '-c', runK6, 'k6-wrapper', config ? '/app/measure.js' : '/app/smoke.js']);
     const loadConfig = await configuration(load);
@@ -134,7 +152,8 @@ async function trial(image, profile) {
       });
     } finally {
       // Remove k6 first because its network namespace belongs to Publisher.
-      try { await remove(load); } finally { await remove(server); }
+      try { await remove(load, uncertainLaunches.has(load)); }
+      finally { await remove(server, uncertainLaunches.has(server)); }
     }
   }
 }
