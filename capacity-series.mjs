@@ -17,7 +17,7 @@ const cwd = fileURLToPath(new URL('.', import.meta.url));
 const save = (name, data) => writeFileSync(resolve(out, name), `${JSON.stringify(data, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
 const sha = spawnSync('git', ['rev-parse', 'HEAD'], { cwd, encoding: 'utf8' });
 if (sha.status !== 0) throw new Error('Cannot identify scenario revision');
-const changes = spawnSync('git', ['status', '--porcelain', '--', 'Dockerfile', '.dockerignore', 'Makefile', 'measure*.js', 'measure*.mjs', 'run-smoke.mjs', 'publisher'], { cwd, encoding: 'utf8' });
+const changes = spawnSync('git', ['status', '--porcelain', '--', 'Dockerfile', '.dockerignore', 'Makefile', 'measure.js', 'measure-profiles.mjs', 'run-smoke.mjs', 'smoke.js', 'capacity-series.mjs', 'publisher'], { cwd, encoding: 'utf8' });
 if (changes.status !== 0 || changes.stdout) throw new Error('Commit the scenario and submodule before running a campaign');
 save('plan.json', { phase, repetitions, rates: rates.map(Number), scenarioRevision: sha.stdout.trim(), budgetMs: capacityBudget });
 
