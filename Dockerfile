@@ -3,6 +3,6 @@ FROM node:22.22.0-alpine@sha256:e4bf2a82ad0a4037d28035ae71529873c069b13eb0455466
 
 COPY --from=k6 /usr/bin/k6 /usr/local/bin/k6
 WORKDIR /app
-COPY run-smoke.mjs smoke.js ./
+COPY run-smoke.mjs smoke.js measure.js ./
 USER node
 ENTRYPOINT ["node", "/app/run-smoke.mjs"]

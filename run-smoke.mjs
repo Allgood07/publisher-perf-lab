@@ -1,13 +1,53 @@
 import { fork, spawn } from 'node:child_process';
 import { once } from 'node:events';
+import { readFileSync } from 'node:fs';
 
+const profile = process.argv[2] ?? 'smoke';
+if (process.argv.length > 3 || !['smoke', 'read', 'publish'].includes(profile)) throw new Error('Unknown profile');
+const measuring = profile !== 'smoke';
 const shutdown = new AbortController();
 const onInt = () => shutdown.abort(new Error('Interrupted (SIGINT)'));
 const onTerm = () => shutdown.abort(new Error('Interrupted (SIGTERM)'));
 process.once('SIGINT', onInt);
 process.once('SIGTERM', onTerm);
-const deadline = AbortSignal.any([shutdown.signal, AbortSignal.timeout(25_000)]);
+const deadline = AbortSignal.any([shutdown.signal, AbortSignal.timeout(measuring ? 35_000 : 25_000)]);
 const children = [];
+
+function startResources() {
+  const start = performance.now();
+  function cgroupNumber(file, pattern) {
+    try {
+      const text = readFileSync(`/sys/fs/cgroup/${file}`, 'utf8').trim();
+      const match = text.match(pattern);
+      return match ? Number(match[1]) : null;
+    } catch {
+      return null;
+    }
+  }
+  const cpu = () => cgroupNumber('cpu.stat', /^usage_usec (\d+)$/m);
+  const cpuStart = cpu();
+  let sampledMemoryMax = null;
+  let memorySamples = 0;
+  function sample() {
+    const bytes = cgroupNumber('memory.current', /^(\d+)$/);
+    if (bytes !== null) {
+      sampledMemoryMax = Math.max(sampledMemoryMax ?? 0, bytes);
+      memorySamples++;
+    }
+  }
+  sample();
+  const timer = setInterval(sample, 250).unref();
+  return () => {
+    clearInterval(timer);
+    sample();
+    const cpuEnd = cpu();
+    const wallMs = performance.now() - start;
+    const cpuPercent = cpuStart !== null && cpuEnd !== null ? 100 * (cpuEnd - cpuStart) / (wallMs * 1000) : null;
+    console.log(`RESOURCES ${JSON.stringify({ profile, wallMs, cpuPercent, sampledMemoryMaxBytes: sampledMemoryMax, memorySamples })}`);
+  };
+}
+
+const finishResources = measuring ? startResources() : null;
 
 function supervise(child) {
   let spawnError;
@@ -39,7 +79,7 @@ async function stop({ child, closed }) {
   return waitClosed();
 }
 
-async function smoke() {
+async function run() {
   const server = supervise(fork('/publisher/src/server.ts', [], {
     execArgv: [], stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
   }));
@@ -51,13 +91,14 @@ async function smoke() {
   deadline.throwIfAborted();
 
   // Do not pass proxy or arbitrary target configuration to k6.
-  const load = supervise(spawn('/usr/local/bin/k6', ['run', '--no-color', '/app/smoke.js'], {
-    env: { HOME: '/tmp', PUBLISHER_PORT: String(port) },
+  const script = measuring ? '/app/measure.js' : '/app/smoke.js';
+  const load = supervise(spawn('/usr/local/bin/k6', ['run', '--no-color', script], {
+    env: { HOME: '/tmp', PUBLISHER_PORT: String(port), PUBLISHER_PROFILE: profile },
     stdio: ['ignore', 'inherit', 'inherit'],
   }));
   const result = await Promise.race([
     load.closed,
-    server.closed.then(() => { throw new Error('Publisher exited during smoke'); }),
+    server.closed.then(() => { throw new Error(`Publisher exited during ${profile}`); }),
     once(deadline, 'abort').then(() => deadline.throwIfAborted()),
   ]);
   if (result.spawnError) throw result.spawnError;
@@ -68,10 +109,10 @@ async function smoke() {
 }
 
 try {
-  await smoke();
+  await run();
 } catch (error) {
   process.exitCode ||= 1;
-  console.error(`Smoke failed: ${error.message}`);
+  console.error(`${profile} failed: ${error.message}`);
 } finally {
   let allClosed = true;
   for (const handle of children.reverse()) {
@@ -80,6 +121,7 @@ try {
       allClosed = false;
     }
   }
+  finishResources?.();
   // Exiting the launcher lets Docker tear down the container even if a child hangs.
   if (!allClosed) process.exit(1);
   process.removeListener('SIGINT', onInt);
