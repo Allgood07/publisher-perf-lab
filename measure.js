@@ -49,7 +49,7 @@ export const options = {
     ...(writes ? { writer: { executor: 'per-vu-iterations', exec: 'writer', startTime: `${firstWriteSeconds}s`, vus: 1, iterations: writes, maxDuration: `${warmupSeconds + windowSeconds - firstWriteSeconds}s`, gracefulStop: '0s' } } : {}),
   },
   thresholds: {
-    ...(!config.capacity ? { 'iterations{scenario:reader}': [`count==${targetReads}`] } : {}),
+    'iterations{scenario:reader}': [config.capacity ? `count>=${targetReads}` : `count==${targetReads}`],
     guest_read_samples: [`count==${targetReads}`],
     'dropped_iterations{scenario:reader}': ['count==0'],
     guest_read_errors: ['rate==0'],
