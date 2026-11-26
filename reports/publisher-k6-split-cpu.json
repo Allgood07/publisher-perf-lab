@@ -1,0 +1,1298 @@
+{
+  "split": {
+    "plan": {
+      "mode": "capacity",
+      "rates": [
+        600,
+        800,
+        1200
+      ],
+      "repeats": 3,
+      "scenarioRevision": "7d7a67f92c7c90b8d2dd57bf65fc1c6121aa6a79",
+      "publisherRevision": "ec1b5ce9fc45d7b2d33957957953f10a83c390a4",
+      "image": "sha256:2b81a2a24d36eb1f2c70957ed0e23ef81a58b8aa45ec9530fefacd4fdefef456",
+      "target": "loopback in Docker network none",
+      "budgets": {
+        "p95": 20,
+        "p99": 50,
+        "visibility": 100
+      },
+      "quotas": {
+        "publisherCpu": 1,
+        "k6Cpu": 2,
+        "memoryMiBPerContainer": 384,
+        "pidsPerContainer": 128
+      },
+      "dateUtc": "2026-11-26T14:01:35.823Z"
+    },
+    "pairs": [
+      {
+        "rate": 600,
+        "repeat": 1,
+        "runs": [
+          {
+            "workload": "read",
+            "profile": "capacity-read-600",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-600",
+              "windowSeconds": 30,
+              "rateTarget": 600,
+              "reads": 18000,
+              "fullReadSamples": 18000,
+              "achievedReadsPerSec": 600,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 18004,
+              "peakActiveVUs": 3,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 18252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.2606455,
+                "p(95)": 1.2124669999999993,
+                "p(99)": 4.868129079999998,
+                "max": 43.486416
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35258.761834000004,
+              "publisher": {
+                "usage_usec": 4806170,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 16428961,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-600",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-600",
+              "windowSeconds": 30,
+              "rateTarget": 600,
+              "reads": 18000,
+              "fullReadSamples": 18000,
+              "achievedReadsPerSec": 600,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 18001,
+              "peakActiveVUs": 2,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 18276,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "p(95)": 0.5547982499999998,
+                "p(99)": 1.867379829999997,
+                "max": 13.974791,
+                "med": 0.280166
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "p(99)": 0.9299999999999999,
+                "max": 1,
+                "med": 0,
+                "p(95)": 0.6499999999999997
+              }
+            },
+            "resources": {
+              "wallMs": 35304.27383299999,
+              "publisher": {
+                "usage_usec": 4615596,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 16094105,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 600,
+        "repeat": 2,
+        "runs": [
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-600",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-600",
+              "windowSeconds": 30,
+              "rateTarget": 600,
+              "reads": 18000,
+              "fullReadSamples": 18000,
+              "achievedReadsPerSec": 600,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 18001,
+              "peakActiveVUs": 5,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 18276,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.28060450000000003,
+                "p(95)": 0.6742097999999993,
+                "p(99)": 2.2398604999999994,
+                "max": 18.009708
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "med": 1,
+                "p(95)": 1,
+                "p(99)": 1,
+                "max": 1
+              }
+            },
+            "resources": {
+              "wallMs": 35284.001458,
+              "publisher": {
+                "usage_usec": 4800024,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 16902255,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "read",
+            "profile": "capacity-read-600",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-600",
+              "windowSeconds": 30,
+              "rateTarget": 600,
+              "reads": 18000,
+              "fullReadSamples": 18000,
+              "achievedReadsPerSec": 600,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 18001,
+              "peakActiveVUs": 3,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 18252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "p(95)": 0.7080246499999989,
+                "p(99)": 2.7513235099999998,
+                "max": 33.088,
+                "med": 0.291875
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35271.965125,
+              "publisher": {
+                "usage_usec": 4933646,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 17264971,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 600,
+        "repeat": 3,
+        "runs": [
+          {
+            "workload": "read",
+            "profile": "capacity-read-600",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-600",
+              "windowSeconds": 30,
+              "rateTarget": 600,
+              "reads": 18000,
+              "fullReadSamples": 18000,
+              "achievedReadsPerSec": 600,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 18001,
+              "peakActiveVUs": 1,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 18252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.2988335,
+                "p(95)": 0.6777583499999998,
+                "p(99)": 2.6018390799999995,
+                "max": 59.44925
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35271.93958399998,
+              "publisher": {
+                "usage_usec": 5009485,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 17978092,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-600",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-600",
+              "windowSeconds": 30,
+              "rateTarget": 600,
+              "reads": 18000,
+              "fullReadSamples": 18000,
+              "achievedReadsPerSec": 600,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 18001,
+              "peakActiveVUs": 2,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 18276,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.283083,
+                "p(95)": 0.60187915,
+                "p(99)": 2.4236076699999947,
+                "max": 30.985125
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "med": 0.5,
+                "p(95)": 1,
+                "p(99)": 1,
+                "max": 1
+              }
+            },
+            "resources": {
+              "wallMs": 35276.423332999984,
+              "publisher": {
+                "usage_usec": 4708078,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 16499620,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 800,
+        "repeat": 1,
+        "runs": [
+          {
+            "workload": "read",
+            "profile": "capacity-read-800",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-800",
+              "windowSeconds": 30,
+              "rateTarget": 800,
+              "reads": 24000,
+              "fullReadSamples": 24000,
+              "achievedReadsPerSec": 800,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 24000,
+              "peakActiveVUs": 2,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 24252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.270208,
+                "p(95)": 0.5682485499999991,
+                "p(99)": 2.44838,
+                "max": 26.228375
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35269.46979200002,
+              "publisher": {
+                "usage_usec": 5160785,
+                "nr_throttled": 1,
+                "throttled_usec": 5538
+              },
+              "k6": {
+                "usage_usec": 19067643,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-800",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-800",
+              "windowSeconds": 30,
+              "rateTarget": 800,
+              "reads": 24000,
+              "fullReadSamples": 24000,
+              "achievedReadsPerSec": 800,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 24001,
+              "peakActiveVUs": 10,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 24276,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "p(95)": 0.6760187499999997,
+                "p(99)": 2.8937511599999985,
+                "max": 57.208958,
+                "med": 0.287042
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "p(99)": 1,
+                "max": 1,
+                "med": 0,
+                "p(95)": 1
+              }
+            },
+            "resources": {
+              "wallMs": 35276.92658399997,
+              "publisher": {
+                "usage_usec": 5694152,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 19975580,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 800,
+        "repeat": 2,
+        "runs": [
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-800",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-800",
+              "windowSeconds": 30,
+              "rateTarget": 800,
+              "reads": 24000,
+              "fullReadSamples": 24000,
+              "achievedReadsPerSec": 800,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 24002,
+              "peakActiveVUs": 3,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 24276,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "max": 20.031667,
+                "med": 0.273041,
+                "p(95)": 0.5526291499999999,
+                "p(99)": 2.0740502499999978
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "p(95)": 1,
+                "p(99)": 1,
+                "max": 1,
+                "med": 1
+              }
+            },
+            "resources": {
+              "wallMs": 35280.80883300002,
+              "publisher": {
+                "usage_usec": 5335251,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 19059543,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "read",
+            "profile": "capacity-read-800",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-800",
+              "windowSeconds": 30,
+              "rateTarget": 800,
+              "reads": 24000,
+              "fullReadSamples": 24000,
+              "achievedReadsPerSec": 800,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 24002,
+              "peakActiveVUs": 2,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 24252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.288792,
+                "p(95)": 0.6684809499999995,
+                "p(99)": 2.278380499999996,
+                "max": 26.161709
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35286.462459,
+              "publisher": {
+                "usage_usec": 5385419,
+                "nr_throttled": 1,
+                "throttled_usec": 26075
+              },
+              "k6": {
+                "usage_usec": 19449704,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 800,
+        "repeat": 3,
+        "runs": [
+          {
+            "workload": "read",
+            "profile": "capacity-read-800",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-800",
+              "windowSeconds": 30,
+              "rateTarget": 800,
+              "reads": 24000,
+              "fullReadSamples": 24000,
+              "achievedReadsPerSec": 800,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 24001,
+              "peakActiveVUs": 2,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 24252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.295875,
+                "p(95)": 0.6639222999999999,
+                "p(99)": 1.9991556599999984,
+                "max": 27.036083
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35253.431249999965,
+              "publisher": {
+                "usage_usec": 5518657,
+                "nr_throttled": 1,
+                "throttled_usec": 22335
+              },
+              "k6": {
+                "usage_usec": 19818704,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-800",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-800",
+              "windowSeconds": 30,
+              "rateTarget": 800,
+              "reads": 24000,
+              "fullReadSamples": 24000,
+              "achievedReadsPerSec": 800,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 24002,
+              "peakActiveVUs": 3,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 24276,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.29193749999999996,
+                "p(95)": 0.7533725999999992,
+                "p(99)": 2.5787435799999994,
+                "max": 58.206625
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "max": 5,
+                "med": 1,
+                "p(95)": 3.5999999999999988,
+                "p(99)": 4.72
+              }
+            },
+            "resources": {
+              "wallMs": 35300.152208000014,
+              "publisher": {
+                "usage_usec": 5545055,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 19251310,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 1200,
+        "repeat": 1,
+        "runs": [
+          {
+            "workload": "read",
+            "profile": "capacity-read-1200",
+            "k6ExitCode": 99,
+            "measurement": {
+              "profile": "capacity-read-1200",
+              "windowSeconds": 30,
+              "rateTarget": 1200,
+              "reads": 35999,
+              "fullReadSamples": 35999,
+              "achievedReadsPerSec": 1199.9666666666667,
+              "dropped": 2,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 35999,
+              "peakActiveVUs": 11,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 36251,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "max": 53.822084,
+                "med": 0.249,
+                "p(95)": 0.9963377999999993,
+                "p(99)": 3.5059791599999963
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35267.735958000005,
+              "publisher": {
+                "usage_usec": 5778908,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 20657455,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-1200",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-1200",
+              "windowSeconds": 30,
+              "rateTarget": 1200,
+              "reads": 36000,
+              "fullReadSamples": 36000,
+              "achievedReadsPerSec": 1200,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 36002,
+              "peakActiveVUs": 4,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 36276,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.2469375,
+                "p(95)": 0.8073704999999988,
+                "p(99)": 2.613178239999996,
+                "max": 26.480167
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "max": 1,
+                "med": 0,
+                "p(95)": 0.6499999999999997,
+                "p(99)": 0.9299999999999999
+              }
+            },
+            "resources": {
+              "wallMs": 35290.48849999998,
+              "publisher": {
+                "usage_usec": 5747859,
+                "nr_throttled": 1,
+                "throttled_usec": 48270
+              },
+              "k6": {
+                "usage_usec": 20246074,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 1200,
+        "repeat": 2,
+        "runs": [
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-1200",
+            "k6ExitCode": 99,
+            "measurement": {
+              "profile": "capacity-publish-1200",
+              "windowSeconds": 30,
+              "rateTarget": 1200,
+              "reads": 35990,
+              "fullReadSamples": 35990,
+              "achievedReadsPerSec": 1199.6666666666667,
+              "dropped": 11,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 35990,
+              "peakActiveVUs": 6,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 36266,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.245834,
+                "p(95)": 0.9560230999999999,
+                "p(99)": 3.6189196199999993,
+                "max": 34.369291
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "max": 1,
+                "med": 0,
+                "p(95)": 1,
+                "p(99)": 1
+              }
+            },
+            "resources": {
+              "wallMs": 35283.94295800006,
+              "publisher": {
+                "usage_usec": 5933330,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 20432603,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "read",
+            "profile": "capacity-read-1200",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-1200",
+              "windowSeconds": 30,
+              "rateTarget": 1200,
+              "reads": 36000,
+              "fullReadSamples": 36000,
+              "achievedReadsPerSec": 1200,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 36002,
+              "peakActiveVUs": 4,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 36252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "p(95)": 0.8216005999999995,
+                "p(99)": 3.4118157499999953,
+                "max": 57.4015,
+                "med": 0.25
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35267.215209000045,
+              "publisher": {
+                "usage_usec": 5826986,
+                "nr_throttled": 1,
+                "throttled_usec": 10332
+              },
+              "k6": {
+                "usage_usec": 20606035,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 1200,
+        "repeat": 3,
+        "runs": [
+          {
+            "workload": "read",
+            "profile": "capacity-read-1200",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-1200",
+              "windowSeconds": 30,
+              "rateTarget": 1200,
+              "reads": 36000,
+              "fullReadSamples": 36000,
+              "achievedReadsPerSec": 1200,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 36001,
+              "peakActiveVUs": 5,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 36252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "p(95)": 0.666667,
+                "p(99)": 2.154520919999998,
+                "max": 19.658125,
+                "med": 0.241417
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "wallMs": 35276.97020800004,
+              "publisher": {
+                "usage_usec": 5432630,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 19859654,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "profile": "capacity-publish-1200",
+            "k6ExitCode": 99,
+            "measurement": {
+              "profile": "capacity-publish-1200",
+              "windowSeconds": 30,
+              "rateTarget": 1200,
+              "reads": 35984,
+              "fullReadSamples": 35984,
+              "achievedReadsPerSec": 1199.4666666666667,
+              "dropped": 18,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 35984,
+              "peakActiveVUs": 5,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 36260,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "p(95)": 0.9311188499999999,
+                "p(99)": 3.3678703899999993,
+                "max": 28.143291,
+                "med": 0.253833
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "p(95)": 1,
+                "p(99)": 1,
+                "max": 1,
+                "med": 0
+              }
+            },
+            "resources": {
+              "wallMs": 35279.775167000014,
+              "publisher": {
+                "usage_usec": 5880492,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              },
+              "k6": {
+                "usage_usec": 20780288,
+                "nr_throttled": 0,
+                "throttled_usec": 0
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "sharedControl": {
+    "plan": {
+      "phase": "capacity",
+      "repetitions": 1,
+      "rates": [
+        600,
+        800,
+        1200
+      ],
+      "scenarioRevision": "f316a667b26589ff274295b9b495f2994440dfac",
+      "budgetMs": {
+        "p95": 20,
+        "p99": 50,
+        "visibility": 100
+      }
+    },
+    "pairs": [
+      {
+        "rate": 600,
+        "repeat": 1,
+        "runs": [
+          {
+            "workload": "read",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-read-600",
+              "windowSeconds": 30,
+              "rateTarget": 600,
+              "reads": 18000,
+              "fullReadSamples": 18000,
+              "achievedReadsPerSec": 600,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 18001,
+              "peakActiveVUs": 2,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 18252,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.32075,
+                "p(95)": 1.18754405,
+                "p(99)": 5.446163419999999,
+                "max": 77.355416
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "profile": "capacity-read-600",
+              "wallMs": 35238.261559000006,
+              "cpuPercent": 66.66721898487057,
+              "sampledMemoryMaxBytes": 83079168,
+              "memorySamples": 142,
+              "throttledPeriods": 23,
+              "sampledProcessCpuPercent": {
+                "publisher": 14.870200084151657,
+                "k6": 51.19435296146868
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-600",
+              "windowSeconds": 30,
+              "rateTarget": 600,
+              "reads": 18000,
+              "fullReadSamples": 18000,
+              "achievedReadsPerSec": 600,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 18001,
+              "peakActiveVUs": 3,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 18277,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "max": 95.097375,
+                "med": 0.30685450000000003,
+                "p(95)": 1.1769419999999995,
+                "p(99)": 6.09252417
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "p(99)": 1.93,
+                "max": 2,
+                "med": 0.5,
+                "p(95)": 1.6499999999999997
+              }
+            },
+            "resources": {
+              "profile": "capacity-publish-600",
+              "wallMs": 35206.283307,
+              "cpuPercent": 64.82669528328806,
+              "sampledMemoryMaxBytes": 84303872,
+              "memorySamples": 142,
+              "throttledPeriods": 20,
+              "sampledProcessCpuPercent": {
+                "publisher": 14.883706849447925,
+                "k6": 49.36618798538262
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 800,
+        "repeat": 1,
+        "runs": [
+          {
+            "workload": "read",
+            "k6ExitCode": 99,
+            "measurement": {
+              "profile": "capacity-read-800",
+              "windowSeconds": 30,
+              "rateTarget": 800,
+              "reads": 23999,
+              "fullReadSamples": 23999,
+              "achievedReadsPerSec": 799.9666666666667,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 23999,
+              "peakActiveVUs": 2,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 24251,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.305666,
+                "p(95)": 1.0348284999999997,
+                "p(99)": 6.473271159999987,
+                "max": 48.709292
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "profile": "capacity-read-800",
+              "wallMs": 35264.420182999995,
+              "cpuPercent": 72.69403797643605,
+              "sampledMemoryMaxBytes": 83914752,
+              "memorySamples": 142,
+              "throttledPeriods": 47,
+              "sampledProcessCpuPercent": {
+                "publisher": 16.135243314571756,
+                "k6": 55.75024315720224
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "k6ExitCode": 0,
+            "measurement": {
+              "profile": "capacity-publish-800",
+              "windowSeconds": 30,
+              "rateTarget": 800,
+              "reads": 24000,
+              "fullReadSamples": 24000,
+              "achievedReadsPerSec": 800,
+              "dropped": 0,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 24002,
+              "peakActiveVUs": 37,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 24276,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.301209,
+                "p(95)": 0.9173937499999997,
+                "p(99)": 5.592271339999994,
+                "max": 68.54775
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "med": 0,
+                "p(95)": 1,
+                "p(99)": 1,
+                "max": 1
+              }
+            },
+            "resources": {
+              "profile": "capacity-publish-800",
+              "wallMs": 35259.454809,
+              "cpuPercent": 72.60252360301888,
+              "sampledMemoryMaxBytes": 84406272,
+              "memorySamples": 142,
+              "throttledPeriods": 39,
+              "sampledProcessCpuPercent": {
+                "publisher": 16.080793168000795,
+                "k6": 55.75809412396748
+              }
+            }
+          }
+        ]
+      },
+      {
+        "rate": 1200,
+        "repeat": 1,
+        "runs": [
+          {
+            "workload": "read",
+            "k6ExitCode": 99,
+            "measurement": {
+              "profile": "capacity-read-1200",
+              "windowSeconds": 30,
+              "rateTarget": 1200,
+              "reads": 35920,
+              "fullReadSamples": 35920,
+              "achievedReadsPerSec": 1197.3333333333333,
+              "dropped": 81,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 35920,
+              "peakActiveVUs": 2,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 36172,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "med": 0.246042,
+                "p(95)": 2.3258294499999987,
+                "p(99)": 11.710418189999999,
+                "max": 72.436125
+              },
+              "publishedObserved": 0,
+              "publicationProbes": 0,
+              "visibleMillis": null
+            },
+            "resources": {
+              "profile": "capacity-read-1200",
+              "wallMs": 35228.993015,
+              "cpuPercent": 73.26952544175637,
+              "sampledMemoryMaxBytes": 90480640,
+              "memorySamples": 142,
+              "throttledPeriods": 64,
+              "sampledProcessCpuPercent": {
+                "publisher": 15.924383639382887,
+                "k6": 56.88496401661908
+              }
+            }
+          },
+          {
+            "workload": "publish",
+            "k6ExitCode": 99,
+            "measurement": {
+              "profile": "capacity-publish-1200",
+              "windowSeconds": 30,
+              "rateTarget": 1200,
+              "reads": 35956,
+              "fullReadSamples": 35956,
+              "achievedReadsPerSec": 1198.5333333333333,
+              "dropped": 46,
+              "budgets": {
+                "p95": 20,
+                "p99": 50,
+                "visibility": 100
+              },
+              "readerIterations": 35956,
+              "peakActiveVUs": 5,
+              "readErrors": 0,
+              "versionMismatches": 0,
+              "allRequests": 36232,
+              "allRequestErrors": 0,
+              "readMillis": {
+                "max": 76.957458,
+                "med": 0.23079149999999998,
+                "p(95)": 1.2305102499999998,
+                "p(99)": 7.974880949999997
+              },
+              "publishedObserved": 8,
+              "publicationProbes": 8,
+              "visibleMillis": {
+                "max": 1,
+                "med": 0,
+                "p(95)": 1,
+                "p(99)": 1
+              }
+            },
+            "resources": {
+              "profile": "capacity-publish-1200",
+              "wallMs": 35273.439848999995,
+              "cpuPercent": 69.35667772898982,
+              "sampledMemoryMaxBytes": 91107328,
+              "memorySamples": 142,
+              "throttledPeriods": 50,
+              "sampledProcessCpuPercent": {
+                "publisher": 15.337319022923062,
+                "k6": 53.467992009672635
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
