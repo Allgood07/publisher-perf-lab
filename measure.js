@@ -49,7 +49,7 @@ export const options = {
     ...(writes ? { writer: { executor: 'per-vu-iterations', exec: 'writer', startTime: `${firstWriteSeconds}s`, vus: 1, iterations: writes, maxDuration: `${warmupSeconds + windowSeconds - firstWriteSeconds}s`, gracefulStop: '0s' } } : {}),
   },
   thresholds: {
-    'iterations{scenario:reader}': config.capacity ? [`count>=${targetReads}`, `count<=${targetReads + 1}`] : [`count==${targetReads}`],
+    ...(!config.capacity ? { 'iterations{scenario:reader}': [`count==${targetReads}`] } : {}),
     guest_read_samples: [`count==${targetReads}`],
     'dropped_iterations{scenario:reader}': ['count==0'],
     guest_read_errors: ['rate==0'],
@@ -86,7 +86,7 @@ export function setup() { publish(versions[0]); }
 export function warmup() { readPublic({ ...request, responseType: 'none' }); }
 
 export function reader() {
-  // With gracefulStop, k6 can invoke one extra iteration at the exact end of the window.
+  // With gracefulStop, k6 can dispatch extra iterations around the window boundary.
   if (config.capacity && exec.scenario.iterationInTest >= targetReads) return;
   const response = readPublic();
   guestReadMillis.add(response.timings.duration);
