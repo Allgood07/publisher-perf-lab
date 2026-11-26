@@ -9,6 +9,20 @@ const profiles = {
   'publish-50': { rate: 50, windowSeconds: 60, preAllocatedVUs: 16, maxVUs: 32, writes: 16 },
 };
 
+const capacities = new Set([50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1100, 1200, 1400, 1600]);
+export const capacityBudget = Object.freeze({ p95: 20, p99: 50, visibility: 100 });
+
 export function measurementProfile(name) {
-  return Object.prototype.hasOwnProperty.call(profiles, name) ? profiles[name] : null;
+  if (Object.prototype.hasOwnProperty.call(profiles, name)) return profiles[name];
+  const match = /^(scan|capacity|soak)-(read|publish)-(\d{2,4})$/.exec(name);
+  if (!match) return null;
+  const [, phase, workload, target] = match;
+  const rate = Number(target);
+  if (!capacities.has(rate) || target !== String(rate)) return null;
+  const windowSeconds = { scan: 12, capacity: 30, soak: 90 }[phase];
+  return {
+    rate, windowSeconds, preAllocatedVUs: 64, maxVUs: 96,
+    writes: workload === 'publish' ? Math.floor((windowSeconds - 4) / 3.5) + 1 : 0,
+    capacity: true,
+  };
 }

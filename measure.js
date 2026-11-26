@@ -2,7 +2,7 @@ import { sleep } from 'k6';
 import exec from 'k6/execution';
 import http from 'k6/http';
 import { Counter, Rate, Trend } from 'k6/metrics';
-import { measurementProfile } from './measure-profiles.mjs';
+import { capacityBudget, measurementProfile } from './measure-profiles.mjs';
 
 const port = Number(__ENV.PUBLISHER_PORT);
 if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new Error('Invalid Publisher port');
@@ -28,12 +28,19 @@ const visiblePublications = new Counter('visible_publications');
 const publicationProbes = new Counter('publication_probes');
 
 function arrival(exec, startTime, duration) {
-  return { executor: 'constant-arrival-rate', exec, startTime, duration, rate, timeUnit: '1s', preAllocatedVUs, maxVUs, gracefulStop: '0s' };
+  const capacityWarmup = config.capacity && exec === 'warmup';
+  return {
+    executor: 'constant-arrival-rate', exec, startTime, duration,
+    rate: capacityWarmup ? 50 : rate, timeUnit: '1s',
+    preAllocatedVUs: capacityWarmup ? 4 : preAllocatedVUs,
+    maxVUs: capacityWarmup ? 4 : maxVUs,
+    gracefulStop: config.capacity && exec === 'reader' ? '2s' : '0s',
+  };
 }
 
 export const options = {
   setupTimeout: '5s',
-  summaryTrendStats: ['med', 'p(95)', 'max'],
+  summaryTrendStats: config.capacity ? ['med', 'p(95)', 'p(99)', 'max'] : ['med', 'p(95)', 'max'],
   scenarios: {
     warmup: arrival('warmup', '0s', `${warmupSeconds}s`),
     reader: arrival('reader', `${warmupSeconds}s`, `${windowSeconds}s`),
@@ -48,6 +55,10 @@ export const options = {
     guest_version_mismatches: ['rate==0'],
     http_req_failed: ['rate==0'],
     ...(writes ? { visible_publications: [`count==${writes}`] } : {}),
+    ...(config.capacity ? {
+      guest_read_ms: [`p(95)<=${capacityBudget.p95}`, `p(99)<=${capacityBudget.p99}`],
+      ...(writes ? { publish_visible_ms: [`p(95)<=${capacityBudget.visibility}`] } : {}),
+    } : {}),
   },
 };
 
@@ -114,6 +125,7 @@ export function handleSummary({ metrics }) {
     fullReadSamples: value('guest_read_samples')?.count ?? 0,
     achievedReadsPerSec: (read?.count ?? 0) / windowSeconds,
     dropped: value('dropped_iterations{scenario:reader}')?.count ?? 0,
+    ...(config.capacity ? { budgets: capacityBudget, peakActiveVUs: value('vus')?.max ?? null } : {}),
     readErrors: value('guest_read_errors')?.passes ?? 0,
     versionMismatches: value('guest_version_mismatches')?.passes ?? 0,
     allRequests: value('http_reqs')?.count ?? 0,
