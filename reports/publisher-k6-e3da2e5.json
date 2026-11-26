@@ -1,0 +1,199 @@
+{
+  "dateUtc": "2026-11-26",
+  "scenarioRevision": "e3da2e5e17d380de8e8fbf04a0e53695d784cbd7",
+  "publisherRevision": "ec1b5ce9fc45d7b2d33957957953f10a83c390a4",
+  "runs": [
+    {
+      "repeat": 1,
+      "measurement": {
+        "profile": "read",
+        "windowSeconds": 20,
+        "rateTarget": 5,
+        "reads": 100,
+        "achievedReadsPerSec": 5,
+        "dropped": 0,
+        "readErrors": 0,
+        "versionMismatches": 0,
+        "allRequests": 127,
+        "allRequestErrors": 0,
+        "readMillis": {
+          "med": 1.8240835,
+          "p(95)": 8.262927399999999,
+          "max": 10.881334
+        },
+        "publishedObserved": 0,
+        "publicationProbes": 0,
+        "visibleMillis": null
+      },
+      "resources": {
+        "profile": "read",
+        "wallMs": 25301.274679000002,
+        "cpuPercent": 8.269417357602846,
+        "sampledMemoryMaxBytes": 142004224,
+        "memorySamples": 102
+      }
+    },
+    {
+      "repeat": 1,
+      "measurement": {
+        "profile": "publish",
+        "windowSeconds": 20,
+        "rateTarget": 5,
+        "reads": 100,
+        "achievedReadsPerSec": 5,
+        "dropped": 0,
+        "readErrors": 0,
+        "versionMismatches": 0,
+        "allRequests": 142,
+        "allRequestErrors": 0,
+        "readMillis": {
+          "med": 1.6600205,
+          "p(95)": 4.142001799999999,
+          "max": 4.868583
+        },
+        "publishedObserved": 5,
+        "publicationProbes": 5,
+        "visibleMillis": {
+          "med": 1,
+          "p(95)": 2.5999999999999996,
+          "max": 3
+        }
+      },
+      "resources": {
+        "profile": "publish",
+        "wallMs": 25199.609179,
+        "cpuPercent": 7.632761231880057,
+        "sampledMemoryMaxBytes": 46395392,
+        "memorySamples": 101
+      }
+    },
+    {
+      "repeat": 2,
+      "measurement": {
+        "profile": "read",
+        "windowSeconds": 20,
+        "rateTarget": 5,
+        "reads": 100,
+        "achievedReadsPerSec": 5,
+        "dropped": 0,
+        "readErrors": 0,
+        "versionMismatches": 0,
+        "allRequests": 127,
+        "allRequestErrors": 0,
+        "readMillis": {
+          "med": 1.629021,
+          "p(95)": 4.820638149999999,
+          "max": 15.516958
+        },
+        "publishedObserved": 0,
+        "publicationProbes": 0,
+        "visibleMillis": null
+      },
+      "resources": {
+        "profile": "read",
+        "wallMs": 25182.752095,
+        "cpuPercent": 7.889634113479129,
+        "sampledMemoryMaxBytes": 46743552,
+        "memorySamples": 101
+      }
+    },
+    {
+      "repeat": 2,
+      "measurement": {
+        "profile": "publish",
+        "windowSeconds": 20,
+        "rateTarget": 5,
+        "reads": 100,
+        "achievedReadsPerSec": 5,
+        "dropped": 0,
+        "readErrors": 0,
+        "versionMismatches": 0,
+        "allRequests": 142,
+        "allRequestErrors": 0,
+        "readMillis": {
+          "med": 1.860417,
+          "p(95)": 5.4727996999999995,
+          "max": 12.74875
+        },
+        "publishedObserved": 5,
+        "publicationProbes": 5,
+        "visibleMillis": {
+          "med": 1,
+          "p(95)": 1,
+          "max": 1
+        }
+      },
+      "resources": {
+        "profile": "publish",
+        "wallMs": 25197.120094,
+        "cpuPercent": 7.880610929313452,
+        "sampledMemoryMaxBytes": 46686208,
+        "memorySamples": 101
+      }
+    },
+    {
+      "repeat": 3,
+      "measurement": {
+        "profile": "read",
+        "windowSeconds": 20,
+        "rateTarget": 5,
+        "reads": 100,
+        "achievedReadsPerSec": 5,
+        "dropped": 0,
+        "readErrors": 0,
+        "versionMismatches": 0,
+        "allRequests": 127,
+        "allRequestErrors": 0,
+        "readMillis": {
+          "med": 1.5593335000000002,
+          "p(95)": 4.0772771,
+          "max": 6.151916
+        },
+        "publishedObserved": 0,
+        "publicationProbes": 0,
+        "visibleMillis": null
+      },
+      "resources": {
+        "profile": "read",
+        "wallMs": 25193.066261,
+        "cpuPercent": 6.961161383975133,
+        "sampledMemoryMaxBytes": 45711360,
+        "memorySamples": 101
+      }
+    },
+    {
+      "repeat": 3,
+      "measurement": {
+        "profile": "publish",
+        "windowSeconds": 20,
+        "rateTarget": 5,
+        "reads": 100,
+        "achievedReadsPerSec": 5,
+        "dropped": 0,
+        "readErrors": 0,
+        "versionMismatches": 0,
+        "allRequests": 142,
+        "allRequestErrors": 0,
+        "readMillis": {
+          "med": 1.5305,
+          "p(95)": 8.1142149,
+          "max": 10.936834
+        },
+        "publishedObserved": 5,
+        "publicationProbes": 5,
+        "visibleMillis": {
+          "med": 2,
+          "p(95)": 2.8,
+          "max": 3
+        }
+      },
+      "resources": {
+        "profile": "publish",
+        "wallMs": 25190.74372,
+        "cpuPercent": 7.229492786090716,
+        "sampledMemoryMaxBytes": 46014464,
+        "memorySamples": 101
+      }
+    }
+  ]
+}
