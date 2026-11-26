@@ -51,7 +51,8 @@ async function remove(name, uncertainLaunch) {
     try { await docker(['rm', '-f', name]); return; }
     catch (error) {
       if (!String(error.stderr).includes('No such container')) throw error;
-      if (!uncertainLaunch || attempt === 12) return;
+      if (!uncertainLaunch) return;
+      if (attempt === 12) throw new Error(`Cleanup unresolved after Docker launch timeout: check and remove container ${name} before continuing`);
       await delay(250);
     }
   }
