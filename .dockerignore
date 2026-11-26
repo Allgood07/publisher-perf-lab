@@ -3,3 +3,6 @@
 !smoke.js
 !measure.js
 !measure-profiles.mjs
+!cpu-sample.sh
+!k6-diagnostic.sh
+!k6-second-buckets.awk

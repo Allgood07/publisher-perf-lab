@@ -39,7 +39,31 @@ function stat(text) {
 
 const limit = (cpus, memory) => ['--cpus', cpus, '--memory', memory, '--pids-limit', '128', '--read-only', '--tmpfs', '/tmp:rw,noexec,nosuid,size=16m', '--init'];
 const mount = ['--mount', `type=bind,source=${resolve(cwd, 'publisher')},target=/publisher,readonly`];
-const runK6 = 'k6 run --no-color "$1"; code=$?; printf "\\nK6_CPU_BEGIN\\n"; cat /sys/fs/cgroup/cpu.stat; printf "K6_CPU_END\\n"; exit "$code"';
+const runK6 = 'if [ "$2" = diagnostic ]; then sh /app/k6-diagnostic.sh "$1"; else k6 run --no-color "$1"; fi; code=$?; printf "\\nK6_CPU_BEGIN\\n"; cat /sys/fs/cgroup/cpu.stat; printf "K6_CPU_END\\n"; exit "$code"';
+const publisherWithCpu = 'sh /app/cpu-sample.sh & exec node /publisher/src/server.ts';
+
+function telemetry(k6, publisher, measurement) {
+  function rows(text, name, columns) {
+    const result = text.split('\n').filter(line => line.startsWith(`${name} `)).map(line => {
+      const fields = line.trim().split(/\s+/).slice(1);
+      if (fields.length !== columns.length) throw new Error(`Invalid ${name} row`);
+      const values = fields.map(x => x === '-' ? null : Number(x));
+      if (!values.every(x => x === null || Number.isFinite(x) && x >= 0)) throw new Error(`Invalid ${name} value`);
+      return Object.fromEntries(columns.map((c, i) => [c, values[i]]));
+    }).sort((a, b) => a.second - b.second);
+    if (result.length < 2 || result.some((row, i) => !Number.isSafeInteger(row.second) || (i && result[i - 1].second >= row.second))) {
+      throw new Error(`Missing or repeated ${name} timestamps`);
+    }
+    return result;
+  }
+  const seconds = rows(k6, 'K6_SECOND', ['second', 'reads', 'dropped', 'vuGaugeMax', 'sampledActiveVUsMax', 'meanReadMs', 'maxReadMs']);
+  const cpu = text => rows(text, 'CPU_SAMPLE', ['second', 'usageUsec', 'throttledPeriods', 'throttledUsec']);
+  const sum = field => seconds.reduce((n, row) => n + row[field], 0);
+  if (sum('reads') !== measurement.reads || sum('dropped') !== measurement.dropped || !seconds.some(row => row.vuGaugeMax !== null) || !seconds.some(row => row.sampledActiveVUsMax !== null)) {
+    throw new Error('Per-second k6 metrics do not reconcile with the trial summary');
+  }
+  return { seconds, cpu: { publisher: cpu(publisher), k6: cpu(k6) } };
+}
 
 async function configuration(name) {
   return JSON.parse(await activeDocker(['inspect', '--format', '{{json .HostConfig}}', name]));
@@ -62,6 +86,7 @@ async function trial(image, profile) {
   const prefix = `publisher-split-${randomUUID()}`;
   const server = `${prefix}-server`, load = `${prefix}-k6`;
   const config = measurementProfile(profile);
+  const diagnostic = profile.startsWith('diagnostic-');
   const wall = config ? config.windowSeconds + 20 : 25;
   let result, failure, k6ExitCode = null;
   let wallMs = null, publisherStart = null, publisherEnd = null;
@@ -89,8 +114,9 @@ async function trial(image, profile) {
     return logs[role];
   }
   try {
-    const serverId = await launch(server, ['--network', 'none', ...limit('1', '384m'), ...mount,
-      '--entrypoint', 'node', image, '/publisher/src/server.ts']);
+    const serverCommand = diagnostic ? ['--entrypoint', '/bin/sh', image, '-c', publisherWithCpu]
+      : ['--entrypoint', 'node', image, '/publisher/src/server.ts'];
+    const serverId = await launch(server, ['--network', 'none', ...limit('1', '384m'), ...mount, ...serverCommand]);
     const serverConfig = await configuration(server);
     if (serverConfig.NetworkMode !== 'none' || serverConfig.NanoCpus !== 1_000_000_000
         || serverConfig.PublishAllPorts || Object.keys(serverConfig.PortBindings ?? {}).length) throw new Error('Publisher isolation mismatch');
@@ -107,7 +133,7 @@ async function trial(image, profile) {
     const start = performance.now();
     await launch(load, ['--network', `container:${serverId}`, ...limit('2', '384m'),
       '--env', `PUBLISHER_PORT=${port}`, '--env', `PUBLISHER_PROFILE=${profile}`, '--env', 'HOME=/tmp',
-      '--entrypoint', '/bin/sh', image, '-c', runK6, 'k6-wrapper', config ? '/app/measure.js' : '/app/smoke.js']);
+      '--entrypoint', '/bin/sh', image, '-c', runK6, 'k6-wrapper', config ? '/app/measure.js' : '/app/smoke.js', diagnostic ? 'diagnostic' : 'normal']);
     const loadConfig = await configuration(load);
     if (loadConfig.NetworkMode !== `container:${serverId}` || loadConfig.NanoCpus !== 2_000_000_000
         || loadConfig.PublishAllPorts || Object.keys(loadConfig.PortBindings ?? {}).length) throw new Error('k6 isolation mismatch');
@@ -131,7 +157,8 @@ async function trial(image, profile) {
       throw new Error('Split smoke did not complete all five checks');
     }
     const publisher = Object.fromEntries(Object.keys(publisherStart).map(k => [k, publisherEnd[k] - publisherStart[k]]));
-    result = { profile, k6ExitCode, measurement, resources: { wallMs, publisher, k6: stat(cpu[1]) } };
+    const trace = diagnostic ? telemetry(k6Log.stdout, (await capture('publisher', server)).stdout, measurement) : null;
+    result = { profile, k6ExitCode, measurement, resources: { wallMs, publisher, k6: stat(cpu[1]) }, ...(trace ? { telemetry: trace } : {}) };
     return result;
   } catch (error) {
     failure = error;
@@ -162,7 +189,7 @@ async function trial(image, profile) {
 let trialNumber = 0;
 try {
   const scenarioRevision = await git('rev-parse', 'HEAD');
-  const launchFiles = ['Dockerfile', '.dockerignore', 'measure.js', 'measure-profiles.mjs', 'run-smoke.mjs', 'smoke.js', 'split-cpu.mjs', 'publisher'];
+  const launchFiles = ['Dockerfile', '.dockerignore', 'measure.js', 'measure-profiles.mjs', 'run-smoke.mjs', 'smoke.js', 'split-cpu.mjs', 'cpu-sample.sh', 'k6-diagnostic.sh', 'k6-second-buckets.awk', 'publisher'];
   const publisherRevision = await git('-C', 'publisher', 'rev-parse', 'HEAD');
   if (await git('status', '--porcelain', '--ignore-submodules=none', '--', ...launchFiles)
       || publisherRevision !== await git('rev-parse', 'HEAD:publisher')
