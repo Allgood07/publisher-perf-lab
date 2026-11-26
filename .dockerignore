@@ -1,3 +1,5 @@
 *
 !run-smoke.mjs
 !smoke.js
+!measure.js
+!measure-profiles.mjs
