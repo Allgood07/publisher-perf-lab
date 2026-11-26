@@ -13,8 +13,8 @@ const [mode, destination, repeatArg, ...rates] = process.argv.slice(2);
 const repeats = Number(repeatArg);
 if (!destination || !(
   (mode === 'smoke' && process.argv.length === 4)
-  || (mode === 'capacity' && [1, 2, 3].includes(repeats) && rates.join(',') === '600,800,1200')
-)) throw new Error('Usage: node split-cpu.mjs smoke <new-dir> | capacity <new-dir> <1|2|3> 600 800 1200');
+  || ([1, 2, 3].includes(repeats) && rates.join(',') === { capacity: '600,800,1200', endurance: '800', diagnostic: '1200' }[mode])
+)) throw new Error('Usage: node split-cpu.mjs smoke <new-dir> | <capacity|endurance|diagnostic> <new-dir> <1|2|3> <600 800 1200|800|1200>');
 
 const output = resolve(destination);
 const imageTag = 'publisher-perf-lab:split-cpu';
@@ -184,7 +184,7 @@ try {
       const workloads = repeat % 2 === 1 ? ['read', 'publish'] : ['publish', 'read'];
       for (const workload of workloads) {
         trialNumber++;
-        const result = await trial(image, `capacity-${workload}-${rate}`);
+        const result = await trial(image, `${mode}-${workload}-${rate}`);
         const { measurement: m, k6ExitCode } = result;
         runs.push({ workload, ...result });
         console.log(`${result.profile} #${repeat}: exit=${k6ExitCode}, reads=${m.reads}, p95=${m.readMillis?.['p(95)']?.toFixed(2)}, p99=${m.readMillis?.['p(99)']?.toFixed(2)}, dropped=${m.dropped}`);
