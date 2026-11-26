@@ -20,6 +20,7 @@ const writeRequest = { ...request, timeout: '500ms', responseCallback: http.expe
 const writeSpacingMs = 3_500;
 const versions = Array.from({ length: writes + 1 }, (_, i) => ({ title: `Publisher measurement V${i + 1}`, body: `publisher-measure-marker-${i + 1}` }));
 const guestReadMillis = new Trend('guest_read_ms', true);
+const guestReadSamples = new Counter('guest_read_samples');
 const guestReadErrors = new Rate('guest_read_errors');
 const guestVersionMismatches = new Rate('guest_version_mismatches');
 const publishVisibleMillis = new Trend('publish_visible_ms', true);
@@ -41,6 +42,7 @@ export const options = {
   },
   thresholds: {
     'iterations{scenario:reader}': [`count==${rate * windowSeconds}`],
+    guest_read_samples: [`count==${rate * windowSeconds}`],
     'dropped_iterations{scenario:reader}': ['count==0'],
     guest_read_errors: ['rate==0'],
     guest_version_mismatches: ['rate==0'],
@@ -77,6 +79,8 @@ export function reader() {
   guestReadErrors.add(response.status !== 200);
   const v = observedVersion(response);
   guestVersionMismatches.add(response.status === 200 && (v < 0 || (!writes && v !== 0)));
+  // Count only iterations that recorded timing, status, and version together.
+  guestReadSamples.add(1);
 }
 
 export function writer() {
@@ -107,6 +111,7 @@ export function handleSummary({ metrics }) {
   const summary = {
     profile, windowSeconds, rateTarget: rate,
     reads: read?.count ?? 0,
+    fullReadSamples: value('guest_read_samples')?.count ?? 0,
     achievedReadsPerSec: (read?.count ?? 0) / windowSeconds,
     dropped: value('dropped_iterations{scenario:reader}')?.count ?? 0,
     readErrors: value('guest_read_errors')?.passes ?? 0,

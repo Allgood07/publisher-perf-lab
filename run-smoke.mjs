@@ -11,7 +11,7 @@ const onInt = () => shutdown.abort(new Error('Interrupted (SIGINT)'));
 const onTerm = () => shutdown.abort(new Error('Interrupted (SIGTERM)'));
 process.once('SIGINT', onInt);
 process.once('SIGTERM', onTerm);
-const deadline = AbortSignal.any([shutdown.signal, AbortSignal.timeout(config ? (config.windowSeconds + 15) * 1000 : 25_000)]);
+const deadline = AbortSignal.any([shutdown.signal, AbortSignal.timeout(config ? (config.windowSeconds + 20) * 1000 : 25_000)]);
 const children = [];
 
 function startResources() {
