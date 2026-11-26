@@ -11,6 +11,7 @@ const profile = __ENV.PUBLISHER_PROFILE;
 const config = measurementProfile(profile);
 if (!config) throw new Error('Invalid measurement profile');
 const { rate, windowSeconds, writes, preAllocatedVUs, maxVUs } = config;
+const targetReads = rate * windowSeconds;
 const warmupSeconds = 5;
 const firstWriteSeconds = warmupSeconds + 1;
 const pollMs = 50;
@@ -48,8 +49,8 @@ export const options = {
     ...(writes ? { writer: { executor: 'per-vu-iterations', exec: 'writer', startTime: `${firstWriteSeconds}s`, vus: 1, iterations: writes, maxDuration: `${warmupSeconds + windowSeconds - firstWriteSeconds}s`, gracefulStop: '0s' } } : {}),
   },
   thresholds: {
-    'iterations{scenario:reader}': [`count==${rate * windowSeconds}`],
-    guest_read_samples: [`count==${rate * windowSeconds}`],
+    'iterations{scenario:reader}': config.capacity ? [`count>=${targetReads}`, `count<=${targetReads + 1}`] : [`count==${targetReads}`],
+    guest_read_samples: [`count==${targetReads}`],
     'dropped_iterations{scenario:reader}': ['count==0'],
     guest_read_errors: ['rate==0'],
     guest_version_mismatches: ['rate==0'],
@@ -85,6 +86,8 @@ export function setup() { publish(versions[0]); }
 export function warmup() { readPublic({ ...request, responseType: 'none' }); }
 
 export function reader() {
+  // With gracefulStop, k6 can invoke one extra iteration at the exact end of the window.
+  if (config.capacity && exec.scenario.iterationInTest >= targetReads) return;
   const response = readPublic();
   guestReadMillis.add(response.timings.duration);
   guestReadErrors.add(response.status !== 200);
@@ -118,14 +121,16 @@ export function writer() {
 
 export function handleSummary({ metrics }) {
   const value = name => metrics[name]?.values ?? null;
-  const read = value('iterations{scenario:reader}');
+  const iterations = value('iterations{scenario:reader}')?.count ?? 0;
+  const samples = value('guest_read_samples')?.count ?? 0;
+  const reads = config.capacity ? samples : iterations;
   const summary = {
     profile, windowSeconds, rateTarget: rate,
-    reads: read?.count ?? 0,
-    fullReadSamples: value('guest_read_samples')?.count ?? 0,
-    achievedReadsPerSec: (read?.count ?? 0) / windowSeconds,
+    reads,
+    fullReadSamples: samples,
+    achievedReadsPerSec: reads / windowSeconds,
     dropped: value('dropped_iterations{scenario:reader}')?.count ?? 0,
-    ...(config.capacity ? { budgets: capacityBudget, peakActiveVUs: value('vus')?.max ?? null } : {}),
+    ...(config.capacity ? { budgets: capacityBudget, readerIterations: iterations, peakActiveVUs: value('vus')?.max ?? null } : {}),
     readErrors: value('guest_read_errors')?.passes ?? 0,
     versionMismatches: value('guest_version_mismatches')?.passes ?? 0,
     allRequests: value('http_reqs')?.count ?? 0,
