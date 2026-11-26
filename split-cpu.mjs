@@ -13,9 +13,8 @@ const [mode, destination, repeatArg, ...rates] = process.argv.slice(2);
 const repeats = Number(repeatArg);
 if (!destination || !(
   (mode === 'smoke' && process.argv.length === 4)
-  || (mode === 'capacity' && [1, 2, 3].includes(repeats) && rates.length > 0 && new Set(rates).size === rates.length
-    && rates.every(rate => ['600', '800', '1200'].includes(rate)))
-)) throw new Error('Usage: node split-cpu.mjs smoke <new-dir> | capacity <new-dir> <1|2|3> <600|800|1200>...');
+  || (mode === 'capacity' && [1, 2, 3].includes(repeats) && rates.join(',') === '600,800,1200')
+)) throw new Error('Usage: node split-cpu.mjs smoke <new-dir> | capacity <new-dir> <1|2|3> 600 800 1200');
 
 const output = resolve(destination);
 const imageTag = 'publisher-perf-lab:split-cpu';
@@ -59,6 +58,17 @@ async function trial(image, profile) {
   const server = `${prefix}-server`, load = `${prefix}-k6`;
   const config = measurementProfile(profile);
   const wall = config ? config.windowSeconds + 20 : 25;
+  let result, failure, k6ExitCode = null;
+  let wallMs = null, publisherStart = null, publisherEnd = null;
+  const file = `${profile}-${trialNumber}`;
+  const logs = {};
+  async function capture(role, name) {
+    if (!logs[role]) {
+      try { logs[role] = await shell('docker', ['logs', name]); }
+      catch (error) { logs[role] = { stdout: error.stdout ?? '', stderr: error.stderr || error.message }; }
+    }
+    return logs[role];
+  }
   try {
     const serverId = await activeDocker(['run', '-d', '--name', server, '--network', 'none', ...limit('1', '384m'), ...mount,
       '--entrypoint', 'node', image, '/publisher/src/server.ts']);
@@ -74,7 +84,7 @@ async function trial(image, profile) {
       if (!port) await delay(100, undefined, { signal: readiness });
     }
     if (Number(port) > 65_535) throw new Error('Invalid dynamic Publisher port');
-    const publisherStart = stat(await activeDocker(['exec', server, 'cat', '/sys/fs/cgroup/cpu.stat']));
+    publisherStart = stat(await activeDocker(['exec', server, 'cat', '/sys/fs/cgroup/cpu.stat']));
     const start = performance.now();
     await activeDocker(['run', '-d', '--name', load, '--network', `container:${serverId}`, ...limit('2', '384m'),
       '--env', `PUBLISHER_PORT=${port}`, '--env', `PUBLISHER_PROFILE=${profile}`, '--env', 'HOME=/tmp',
@@ -83,16 +93,14 @@ async function trial(image, profile) {
     if (loadConfig.NetworkMode !== `container:${serverId}` || loadConfig.NanoCpus !== 2_000_000_000
         || loadConfig.PublishAllPorts || Object.keys(loadConfig.PortBindings ?? {}).length) throw new Error('k6 isolation mismatch');
     const exit = await activeDocker(['wait', load], { timeout: (wall + 5) * 1000 });
-    const wallMs = performance.now() - start;
-    const publisherEnd = stat(await activeDocker(['exec', server, 'cat', '/sys/fs/cgroup/cpu.stat']));
-    const logs = await shell('docker', ['logs', load]);
-    const combined = `${logs.stdout}\n${logs.stderr}`;
-    await writeFile(resolve(output, `${profile}-${trialNumber}.log`), combined, { mode: 0o600, flag: 'wx' });
-    const record = /^MEASUREMENT (.+)$/m.exec(logs.stdout);
-    const cpu = /^K6_CPU_BEGIN\r?\n([\s\S]*?)^K6_CPU_END$/m.exec(logs.stdout);
-    if (!cpu || !/^(0|99|108)$/.test(exit)) throw new Error(`${profile}: infrastructure failure (exit ${exit})`);
+    wallMs = performance.now() - start;
+    k6ExitCode = /^\d+$/.test(exit) ? Number(exit) : null;
+    const k6Log = await capture('k6', load);
+    const record = /^MEASUREMENT (.+)$/m.exec(k6Log.stdout);
+    const cpu = /^K6_CPU_BEGIN\r?\n([\s\S]*?)^K6_CPU_END$/m.exec(k6Log.stdout);
+    if (!cpu || ![0, 99, 108].includes(k6ExitCode)) throw new Error(`${profile}: infrastructure failure (exit ${exit})`);
     const measurement = record ? JSON.parse(record[1]) : null;
-    const k6ExitCode = Number(exit);
+    publisherEnd = stat(await activeDocker(['exec', server, 'cat', '/sys/fs/cgroup/cpu.stat']));
     if (config) {
       if (!measurement || measurement.profile !== profile || measurement.rateTarget !== config.rate
           || measurement.windowSeconds !== config.windowSeconds) throw new Error('Unexpected measurement summary');
@@ -100,14 +108,34 @@ async function trial(image, profile) {
           || measurement.fullReadSamples !== measurement.reads || measurement.dropped !== 0
           || measurement.readErrors !== 0 || measurement.allRequestErrors !== 0 || measurement.versionMismatches !== 0
           || measurement.publishedObserved !== config.writes)) throw new Error('Successful threshold run has an incomplete result');
-    } else if (k6ExitCode !== 0 || !logs.stdout.includes('5 complete and 0 interrupted iterations')) {
+    } else if (k6ExitCode !== 0 || !k6Log.stdout.includes('5 complete and 0 interrupted iterations')) {
       throw new Error('Split smoke did not complete all five checks');
     }
     const publisher = Object.fromEntries(Object.keys(publisherStart).map(k => [k, publisherEnd[k] - publisherStart[k]]));
-    return { profile, k6ExitCode, measurement, resources: { wallMs, publisher, k6: stat(cpu[1]) } };
+    result = { profile, k6ExitCode, measurement, resources: { wallMs, publisher, k6: stat(cpu[1]) } };
+    return result;
+  } catch (error) {
+    failure = error;
+    throw error;
   } finally {
-    // Remove k6 first because its network namespace belongs to Publisher.
-    try { await remove(load); } finally { await remove(server); }
+    try {
+      // Persist each attempt independently, including interrupted or incomplete pairs.
+      if (failure && !logs.k6) await docker(['stop', '-t', '1', load]).catch(() => {});
+      await capture('k6', load);
+      await capture('publisher', server);
+      for (const [role, { stdout, stderr }] of Object.entries(logs)) {
+        await writeFile(resolve(output, `${file}-${role}.log`), `${stdout}\n${stderr}`, { mode: 0o600, flag: 'wx' });
+      }
+      let partial = null;
+      if (!result) try { partial = JSON.parse(/^MEASUREMENT (.+)$/m.exec(logs.k6.stdout)?.[1]); } catch { /* missing or invalid summary */ }
+      await save(`${file}.json`, result ? { status: 'completed', ...result } : {
+        status: 'infrastructure-failure', profile, k6ExitCode, measurement: partial,
+        resources: { wallMs, publisherStart, publisherEnd }, error: failure?.message,
+      });
+    } finally {
+      // Remove k6 first because its network namespace belongs to Publisher.
+      try { await remove(load); } finally { await remove(server); }
+    }
   }
 }
 
